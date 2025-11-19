@@ -12,9 +12,10 @@ Model name is converted to lowercase for the collection name:
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Literal
+from datetime import datetime
 
-# Example schemas (replace with your own):
+# Example schemas (kept for reference):
 
 class User(BaseModel):
     """
@@ -38,11 +39,35 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
 # --------------------------------------------------
+# Ride hailing (Uber-like) minimal schemas
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Location(BaseModel):
+    lat: float = Field(..., ge=-90, le=90)
+    lng: float = Field(..., ge=-180, le=180)
+
+class Rider(BaseModel):
+    name: str
+    phone: Optional[str] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+class Driver(BaseModel):
+    name: str
+    car: Optional[str] = None
+    plate: Optional[str] = None
+    location: Optional[Location] = None
+    is_available: bool = True
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+class Ride(BaseModel):
+    rider_id: str
+    driver_id: Optional[str] = None
+    pickup: Location
+    dropoff: Location
+    status: Literal[
+        "requested", "assigned", "accepted", "in_progress", "completed", "cancelled"
+    ] = "requested"
+    requested_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
